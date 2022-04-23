@@ -7,7 +7,7 @@ import com.ce.instashare.model.User;
 import java.util.List;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, String> {
     public List<User> getByName(String name);
     public List<User> getByEmail(String email);
     public List<User> findByEmailAndPassword(String email,String password);

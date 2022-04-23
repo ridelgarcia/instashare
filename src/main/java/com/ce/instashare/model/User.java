@@ -1,14 +1,12 @@
 package com.ce.instashare.model;
 
+import java.time.Instant;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "[user]")
-public class User {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+public class User extends BaseEntity {	
 
 	@Column(name = "name")
 	private String name;
@@ -22,15 +20,17 @@ public class User {
     @Column(name = "password")
 	private String password;
 
-    @Column(name = "role")
-	private Integer role;
+    
+    @ManyToOne
+	private Role role;
 
 
 	public User() {
-
+		super();
 	}
 
-	public User(String name, String lastname, String email, String password,Integer role) {
+	public User(String id, Instant createdAt, Instant modifiedAt, int version,String name, String lastname, String email, String password,Role role) {
+		super(id,createdAt,modifiedAt,version);
 		this.name = name;
         this.lastname = lastname;
         this.email = email;
@@ -38,10 +38,7 @@ public class User {
         this.role = role;
 	}
 
-	public Long getId() {
-		return this.id;
-	}
-
+	
 	public String getName() {
 		return name;
 	}
@@ -73,16 +70,16 @@ public class User {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-    public Integer getRole() {
+    public Role getRole() {
 		return role;
 	}
 
-	public void setRole(Integer role) {
+	public void setRole(Role role) {
 		this.role = role;
 	}
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", name=" + name + ", lastname=" + lastname + ", email=" + email + ", role=" + role + "]";
+		return "User [name=" + name + ", lastname=" + lastname + ", email=" + email + ", role=" + role.toString() + "]";
 	}
 }
 
