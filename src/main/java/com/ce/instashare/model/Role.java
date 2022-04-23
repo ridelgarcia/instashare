@@ -13,31 +13,31 @@ public class Role extends BaseEntity{
 	private String rolename;
 	
 	@Column(name = "rolecode")
-	private String rolecode;
+	private int rolecode;
 	
 	public Role() {
 		super();
 	}
 
-	public Role(String id, Instant createdAt, Instant modifiedAt, int version,String rolename, String rolecode) {
+	public Role(String id, Instant createdAt, Instant modifiedAt, int version,String rolename, int rolecode) {
 		super(id,createdAt,modifiedAt,version);
 		this.rolename = rolename;
 		this.rolecode = rolecode;
 	}
 
-	public String getRolename() {
+	public String getRoleName() {
 		return rolename;
 	}
 
-	public void setRolename(String rolename) {
+	public void setRoleName(String rolename) {
 		this.rolename = rolename;
 	}
 
-	public String getRolecode() {
+	public int getRoleCode() {
 		return rolecode;
 	}
 
-	public void setRolecode(String rolecode) {
+	public void setRoleCode(int rolecode) {
 		this.rolecode = rolecode;
 	}
 

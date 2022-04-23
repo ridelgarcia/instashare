@@ -9,15 +9,15 @@ public class RoleRequestDTO {
 	
 	private String rolename;	
 	
-	private String rolecode;
+	private int rolecode;
 	
 	public RoleRequestDTO() {
 		this.id = "";
 		this.rolename = "";
-		this.rolecode = "";
+		this.rolecode = 0;
 	}
 
-	public RoleRequestDTO(String id, String rolename, String rolecode) {
+	public RoleRequestDTO(String id, String rolename, int rolecode) {
 		this.id = id;
 		this.rolename = rolename;
 		this.rolecode = rolecode;
@@ -39,11 +39,11 @@ public class RoleRequestDTO {
 		this.rolename = rolename;
 	}
 
-	public String getRolecode() {
+	public int getRolecode() {
 		return rolecode;
 	}
 
-	public void setRolecode(String rolecode) {
+	public void setRolecode(int rolecode) {
 		this.rolecode = rolecode;
 	}
 

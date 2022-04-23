@@ -1,6 +1,8 @@
 package com.ce.instashare.dto.user.request;
 
 import javax.validation.constraints.NotNull;
+
+import com.ce.instashare.dto.role.request.RoleRequestDTO;
 public class SignUpUserRequestDTO {
 	
 	@NotNull
@@ -12,17 +14,17 @@ public class SignUpUserRequestDTO {
 	@NotNull
     private String password;
 	@NotNull
-    private Integer role;
+	private RoleRequestDTO role;
 	
 	public SignUpUserRequestDTO() {
 		this.name = "";
 		this.lastname = "";
 		this.email = "";
 		this.password = "";
-		this.role = 0;
+		this.role = null;
 	}
 	
-	public SignUpUserRequestDTO(String name, String lastname, String email, String password, Integer role) {
+	public SignUpUserRequestDTO(String name, String lastname, String email, String password, RoleRequestDTO role) {
 		this.name = name;
 		this.lastname = lastname;
 		this.email = email;
@@ -62,18 +64,18 @@ public class SignUpUserRequestDTO {
 		this.password = password;
 	}
 
-	public Integer getRole() {
+	public RoleRequestDTO getRole() {
 		return role;
 	}
 
-	public void setRole(Integer role) {
+	public void setRole(RoleRequestDTO role) {
 		this.role = role;
 	}
 
 	@Override
 	public String toString() {
 		return "SignUpRequestDTO [name=" + name + ", lastname=" + lastname + ", email=" + email + ", password="
-				+ password + ", role=" + role + "]";
+				+ password + ", role=" + role.toString() + "]";
 	}
 
 }
