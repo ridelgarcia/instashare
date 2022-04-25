@@ -1,11 +1,20 @@
 package com.ce.instashare.dto.user.request;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SignInUserRequestDTO {
 	
-	@NotNull
+	@JsonProperty(required = true)
+	@NotEmpty
+	@NotBlank
 	private String email;
-	@NotNull
+	
+	@JsonProperty(required = true)
+	@NotEmpty
+	@NotBlank
     private String password;
 	
 	public SignInUserRequestDTO() {

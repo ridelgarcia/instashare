@@ -1,19 +1,35 @@
 package com.ce.instashare.dto.user.request;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 
 import com.ce.instashare.dto.role.request.RoleRequestDTO;
+import com.fasterxml.jackson.annotation.JsonProperty;
 public class SignUpUserRequestDTO {
 	
-	@NotNull
+	@JsonProperty(required = true)
+	@NotEmpty
+	@NotBlank
     private String name;
-	@NotNull
+	
+	@JsonProperty(required = true)
+	@NotEmpty
+	@NotBlank
 	private String lastname;
-	@NotNull
+	
+	@JsonProperty(required = true)
+	@NotEmpty
+	@NotBlank
 	private String email;
-	@NotNull
+	
+	@JsonProperty(required = true)
+	@NotEmpty
+	@NotBlank
     private String password;
-	@NotNull
+	
+	@JsonProperty(required = true)
+	@NotEmpty
+	@NotBlank
 	private RoleRequestDTO role;
 	
 	public SignUpUserRequestDTO() {

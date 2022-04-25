@@ -8,6 +8,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.ce.instashare.dto.role.request.RoleRequestDTO;
 import com.ce.instashare.dto.user.request.SignUpUserRequestDTO;
@@ -36,9 +38,9 @@ public class InstashareApplication {
     public void dataRoleSetup(RoleRepository repository){
     	Role admin = new Role();
     	Role regularUser = new Role();
-    	admin.setRoleName("Administrator");
+    	admin.setRoleName("ADMIN");
     	admin.setRoleCode(0);
-    	regularUser.setRoleName("Regular User");
+    	regularUser.setRoleName("USER");
     	regularUser.setRoleCode(1);
     	repository.save(admin);
     	repository.save(regularUser);

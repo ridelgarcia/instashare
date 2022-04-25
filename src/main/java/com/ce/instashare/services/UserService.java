@@ -1,10 +1,13 @@
 package com.ce.instashare.services;
 
-import java.io.Serializable;
-import java.util.List;
 
+import java.util.List;
+import java.util.Set;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.modelmapper.ModelMapper;
@@ -17,18 +20,22 @@ import com.ce.instashare.dto.user.request.SignInUserRequestDTO;
 import com.ce.instashare.dto.user.request.SignUpUserRequestDTO;
 import com.ce.instashare.dto.user.request.UserRequestDTO;
 import com.ce.instashare.dto.user.response.SignInUserResponseDTO;
+import com.ce.instashare.dto.user.response.UserPageResponseDTO;
 import com.ce.instashare.dto.user.response.UserResponseDTO;
 import com.ce.instashare.model.Role;
 import com.ce.instashare.model.User;
 import com.ce.instashare.repositories.UserRepository;
+import com.ce.instashare.security.Authority;
 
 import java.util.ArrayList;
-
+import java.util.HashSet;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -46,9 +53,7 @@ public class UserService implements UserDetailsService {
 	private JwtTokenUtil jwtTokenUtil;
 
 	@Autowired
-	private UserRepository rep;
-	
-	
+	private UserRepository rep;	
 	
 	public UserResponseDTO signup(SignUpUserRequestDTO userDto) throws Exception{
 		List<User> users = this.getByEmail(userDto.getEmail());
@@ -60,8 +65,9 @@ public class UserService implements UserDetailsService {
 			response = modelMapper.map(user,UserResponseDTO.class);			
 		}
 		else{
-			logger.debug("Not Registered, email already exist:: " + userDto.getEmail());
-			throw new Exception("Not Registered email already exist");
+			String error = "Not Registered, email already exist:: " + userDto.getEmail();
+			logger.debug(error);
+			throw new Exception(error);
 		}
 		return response;
 	}
@@ -75,20 +81,20 @@ public class UserService implements UserDetailsService {
 				this.authenticate(login.getEmail(), login.getPassword());
 				final UserDetails userDetails = this
 						.loadUserByUsername(login.getEmail());
-
 				final String token = jwtTokenUtil.generateToken(userDetails);
 				response = modelMapper.map(user,SignInUserResponseDTO.class);
 				response.setToken(token);
 				logger.debug("Login successful for user:: " + login.getEmail());				
 			}
 			catch (Exception e) {
-				logger.debug("Invalid login attempt for user :: " + login.getEmail());
-				throw new Exception("Bad Credentials " + login.getEmail());
+				logger.debug(e.getMessage());
+				throw e;
 			}
 		}
 		else{
-			logger.debug("Invalid login attempt for user :: " + login.getEmail());
-			throw new Exception("Bad Credentials " + login.getEmail());
+			String error = "Invalid login attempt for user :: " + login.getEmail();
+			logger.debug(error);
+			throw new Exception(error);
 		}
 		return response;
 	}
@@ -96,8 +102,9 @@ public class UserService implements UserDetailsService {
 	public UserResponseDTO updateUser(UserRequestDTO user) throws  Exception{
 		User existingUser = this.getById(user.getId());
 		if (existingUser == null) {
-			logger.debug("User with id " + user.getId() + " does not exists");
-			throw new Exception("User not found");
+			String error = "User with id " + user.getId() + " does not exists";
+			logger.debug(error);
+			throw new Exception(error);
 		} else {
 			existingUser.setEmail(user.getEmail());
 			existingUser.setLastName(user.getLastname());
@@ -108,50 +115,58 @@ public class UserService implements UserDetailsService {
 			return response;
 		}
 	}
-	
-	private void authenticate(String username, String password) throws Exception {
-		try {			
-			context.getBean(AuthenticationManager.class).authenticate(new UsernamePasswordAuthenticationToken(username, password));
-			
-		} catch (DisabledException e) {
-			throw new Exception("USER_DISABLED", e);
-		} catch (BadCredentialsException e) {
-			throw new Exception("INVALID_CREDENTIALS", e);
+	public UserResponseDTO getUser(String id)throws Exception{
+		User user = getById(id);
+		UserResponseDTO userResponse = null;
+		if(user == null) {
+			String error = "User with id " + id + " does not exists";
+			logger.debug(error);
+			throw new Exception(error);
 		}
+			
+		else {
+			userResponse = modelMapper.map(user, UserResponseDTO.class);
+		}
+		return userResponse;
+	}
+	public UserPageResponseDTO getAllUsers(int page,int size,String sortField,String direction,List<String> status,String search) throws Exception{
+		Sort sort = Sort.by(sortField);
+		if(direction == "ASC")
+			sort = sort.ascending();
+		else if(direction == "DESC")
+			sort = sort.descending();
+		PageRequest p = PageRequest.of(page, size, sort);
+		Page<User> pageR = rep.findAll(p);		
+		UserPageResponseDTO response = new UserPageResponseDTO();
+		response.setStart(pageR.getNumber());
+		response.setEnd(pageR.getTotalElements());
+		response.setSize(pageR.getSize());
+		List<User> users = pageR.toList();
+		List<UserResponseDTO> usersR = new ArrayList<UserResponseDTO>();
+		for (User user : users) {
+			usersR.add(modelMapper.map(user, UserResponseDTO.class));
+		}
+		response.setUsers(usersR);
+		return response;
 	}
 	
-	public User save(User entity) {
-		return rep.save(entity);
-	}
-
-	public void register(User user){
-		user.setPassword(context.getBean(PasswordEncoder.class).encode(user.getPassword()));
-		save(user);
-	}
-	
-	public User getById(String id) {
-		return rep.getById(id);
-	}
-
-
-	public List<User> getAll() {
-		return rep.findAll();
-	}
-
-	
-	public void delete(User user) {
-		rep.delete(user);
-	}
-
-	public List<User> getByEmail(String email){
-		return rep.getByEmail(email);
-	}
-
+	public void deleteUser(String id)throws Exception{
+		User user = getById(id);		
+		if (user == null) {
+			String error = "User with id " + id + " does not exists";
+			logger.debug(error);
+			throw new Exception(error);
+		} else {
+			delete(user);
+			logger.debug("User with id " + id + " deleted");			
+		}		
+	}	
 	public User getByEmailAndPassword(String email,String password){
 		User user = null;
 		List<User> users = rep.getByEmail(email);
-		if(users.size() > 0){
-			if(context.getBean(PasswordEncoder.class).matches(password,users.get(0).getPassword())){
+		if(users.size() > 0){			
+			PasswordEncoder encoder = context.getBean("BCryptPasswordEncoder",PasswordEncoder.class); 
+			if(encoder.matches(password,users.get(0).getPassword())){				
 				user = users.get(0);
 			}			
 		}
@@ -163,11 +178,48 @@ public class UserService implements UserDetailsService {
 		List<User> users = rep.getByEmail(username); 
 
 		if (users.size() > 0) {
+			
+			Set<Authority> authorities = new HashSet<Authority>();
+			authorities.add(new Authority(users.get(0).getRole().getRoleName()));
 			return new org.springframework.security.core.userdetails.User(users.get(0).getEmail(),users.get(0).getPassword(),
-					new ArrayList<>());
+					authorities);
 		} else {
 			throw new UsernameNotFoundException("User not found with email: " + username);
 		}
 	}
+	private void authenticate(String username, String password) throws Exception {
+		try {			
+			Authentication authentication = context.getBean(AuthenticationManager.class).authenticate(new UsernamePasswordAuthenticationToken(username, password));
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+		} catch (DisabledException e) {
+			throw new Exception("USER_DISABLED", e);
+		} catch (BadCredentialsException e) {
+			throw new Exception("INVALID_CREDENTIALS", e);
+		}
+	}
+	
+	private User save(User entity) {
+		return rep.save(entity);
+	}
+
+	private void register(User user){
+		
+		user.setPassword(context.getBean("BCryptPasswordEncoder",PasswordEncoder.class).encode(user.getPassword()));
+		save(user);
+	}
+	
+	private User getById(String id) {
+		return rep.findById(id).get();
+	}
+
+	
+	private void delete(User user) {
+		rep.delete(user);
+	}
+
+	public List<User> getByEmail(String email){
+		return rep.getByEmail(email);
+	}
+
 
 }
