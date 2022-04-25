@@ -175,10 +175,8 @@ public class UserService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		List<User> users = rep.getByEmail(username); 
-
-		if (users.size() > 0) {
-			
+		List<User> users = rep.getByEmail(username);
+		if (users.size() > 0) {			
 			Set<Authority> authorities = new HashSet<Authority>();
 			authorities.add(new Authority(users.get(0).getRole().getRoleName()));
 			return new org.springframework.security.core.userdetails.User(users.get(0).getEmail(),users.get(0).getPassword(),

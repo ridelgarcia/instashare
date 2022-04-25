@@ -70,7 +70,7 @@ public class UserController {
 			return new ResponseEntity<String>(e.getMessage(),HttpStatus.BAD_REQUEST);
 		}
 	}
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@RequestMapping(value = "/getallusers",method = RequestMethod.GET)
 	public ResponseEntity<?> getAllUsers(
 			@RequestParam(required = false, name = "page",
@@ -92,7 +92,7 @@ public class UserController {
 		}
 		
 	}
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAuthority('ADMIN')")
 	@RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<Void> deleteUser(@PathVariable("id") String id) {
 		try	{

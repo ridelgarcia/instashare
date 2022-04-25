@@ -1,6 +1,6 @@
 package com.ce.instashare;
 
-import java.io.Console;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -8,8 +8,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 
 import com.ce.instashare.dto.role.request.RoleRequestDTO;
 import com.ce.instashare.dto.user.request.SignUpUserRequestDTO;
@@ -45,9 +44,12 @@ public class InstashareApplication {
     	repository.save(admin);
     	repository.save(regularUser);
     	RoleRequestDTO roleAdminRequest = new RoleRequestDTO(admin.getId(),admin.getRoleName(),admin.getRoleCode());
+    	RoleRequestDTO roleUserRequest = new RoleRequestDTO(regularUser.getId(),regularUser.getRoleName(),regularUser.getRoleCode());
     	SignUpUserRequestDTO dto = new SignUpUserRequestDTO("Ridel", "Garcia", "rmora900121@gmail.com", "90012137784", roleAdminRequest);
+    	SignUpUserRequestDTO dto1 = new SignUpUserRequestDTO("Evelin", "Mora", "emora@gmail.com", "90012137784", roleUserRequest);
     	try {
     		userService.signup(dto);
+    		userService.signup(dto1);
     	}
     	catch (Exception e) {
 			

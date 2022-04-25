@@ -16,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.h2.server.web.WebServlet;
 
+
+
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -44,6 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         registrationBean.addUrlMappings("/h2-ui/*");
         return registrationBean;
     }
+   
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {		
 		httpSecurity.csrf().disable()
