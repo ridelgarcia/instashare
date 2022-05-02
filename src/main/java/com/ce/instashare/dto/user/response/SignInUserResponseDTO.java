@@ -3,6 +3,8 @@ package com.ce.instashare.dto.user.response;
 import com.ce.instashare.dto.role.response.RoleResponseDTO;
 
 public class SignInUserResponseDTO {
+	
+	private String id;
 
 	private String name;
 
@@ -15,6 +17,7 @@ public class SignInUserResponseDTO {
     private String token;
     
     public SignInUserResponseDTO(){
+    	this.id = "";
 		this.name = "";
 		this.lastname = "";
 		this.email = "";
@@ -22,12 +25,21 @@ public class SignInUserResponseDTO {
 		this.token = "";
 	}
 
-	public SignInUserResponseDTO(String name, String lastname, String email, RoleResponseDTO role, String token) {
+	public SignInUserResponseDTO(String id,String name, String lastname, String email, RoleResponseDTO role, String token) {
+		this.id = id;
 		this.name = name;
 		this.lastname = lastname;
 		this.email = email;
 		this.role = role;
 		this.token = token;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public String getName() {

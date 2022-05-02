@@ -8,7 +8,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.ce.instashare.dto.role.request.RoleRequestDTO;
 import com.ce.instashare.dto.user.request.SignUpUserRequestDTO;
@@ -19,7 +19,7 @@ import com.ce.instashare.services.UserService;
 
 
 
-
+@CrossOrigin
 @SpringBootApplication
 public class InstashareApplication {
 	
