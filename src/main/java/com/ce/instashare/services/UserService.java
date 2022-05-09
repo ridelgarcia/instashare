@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 
 import com.ce.instashare.config.JwtTokenUtil;
+import com.ce.instashare.dto.common.response.GenericResponseDTO;
+import com.ce.instashare.dto.user.request.CheckEmailRequestDTO;
 import com.ce.instashare.dto.user.request.SignInUserRequestDTO;
 import com.ce.instashare.dto.user.request.SignUpUserRequestDTO;
 import com.ce.instashare.dto.user.request.UserRequestDTO;
@@ -56,18 +58,23 @@ public class UserService implements UserDetailsService {
 	private UserRepository rep;	
 	
 	public UserResponseDTO signup(SignUpUserRequestDTO userDto) throws Exception{
-		List<User> users = this.getByEmail(userDto.getEmail());
 		UserResponseDTO response = null;
-		if(users.size() == 0){
-			User user = modelMapper.map(userDto,User.class);		
-			this.register(user);
-			logger.debug("Registered:: " + user);
-			response = modelMapper.map(user,UserResponseDTO.class);			
+		try {
+			List<User> users = this.getByEmail(userDto.getEmail());
+			if(users.size() == 0){
+				User user = modelMapper.map(userDto,User.class);		
+				this.register(user);
+				logger.debug("Registered:: " + user);
+				response = modelMapper.map(user,UserResponseDTO.class);			
+			}
+			else{
+				String error = "Not Registered, email already exist:: " + userDto.getEmail();
+				logger.debug(error);
+				throw new Exception(error);
+			}
 		}
-		else{
-			String error = "Not Registered, email already exist:: " + userDto.getEmail();
-			logger.debug(error);
-			throw new Exception(error);
+		catch (Exception e) {
+			throw e;
 		}
 		return response;
 	}
@@ -172,7 +179,23 @@ public class UserService implements UserDetailsService {
 		}
 		return user;
 	}
-
+	public GenericResponseDTO checkEmail(CheckEmailRequestDTO checkEmail) throws Exception{
+		
+		GenericResponseDTO response = new GenericResponseDTO(0,"SUCCESS");
+		try {
+			List<User> users = this.getByEmail(checkEmail.getEmail());
+			if(users.size() > 0){
+				String error = "ERROR Email Already Exist:: " + checkEmail.getEmail();
+				logger.debug(error);
+				response.setErrorCode(1);
+				response.setErrorDescription(error);						
+			}
+		}
+		catch (Exception e) {
+			throw e;
+		}
+		return response;
+	}
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		List<User> users = rep.getByEmail(username);

@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 import com.ce.instashare.services.UserService;
+import com.ce.instashare.dto.common.response.GenericResponseDTO;
+import com.ce.instashare.dto.user.request.CheckEmailRequestDTO;
 import com.ce.instashare.dto.user.request.SignInUserRequestDTO;
 import com.ce.instashare.dto.user.request.SignUpUserRequestDTO;
 import com.ce.instashare.dto.user.request.UserRequestDTO;
@@ -103,5 +105,15 @@ public class UserController {
 		catch (Exception e) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 		}
-	}	
+	}
+	@RequestMapping(value = "/checkemail", method = RequestMethod.POST)
+	public ResponseEntity<?> checkEmail(@RequestBody CheckEmailRequestDTO checkEmail) {
+		try {
+			GenericResponseDTO response = userService.checkEmail(checkEmail);
+			return new ResponseEntity<GenericResponseDTO>(response,HttpStatus.OK);
+		}
+		catch (Exception e) {
+			return new ResponseEntity<String>(e.getMessage(),HttpStatus.BAD_REQUEST);
+		}
+	}
 }
