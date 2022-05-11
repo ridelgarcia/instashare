@@ -46,6 +46,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class UserService implements UserDetailsService {
 	
 	private static Logger logger = LogManager.getLogger(UserService.class);
+	
 	private static final ModelMapper modelMapper = new ModelMapper();
 	
 	@Autowired
@@ -55,7 +56,10 @@ public class UserService implements UserDetailsService {
 	private JwtTokenUtil jwtTokenUtil;
 
 	@Autowired
-	private UserRepository rep;	
+	private UserRepository rep;
+	
+	@Autowired
+	StorageService storageServ;
 	
 	public UserResponseDTO signup(SignUpUserRequestDTO userDto) throws Exception{
 		UserResponseDTO response = null;
@@ -65,6 +69,7 @@ public class UserService implements UserDetailsService {
 				User user = modelMapper.map(userDto,User.class);		
 				this.register(user);
 				logger.debug("Registered:: " + user);
+				storageServ.createStorageForUser(user);
 				response = modelMapper.map(user,UserResponseDTO.class);			
 			}
 			else{

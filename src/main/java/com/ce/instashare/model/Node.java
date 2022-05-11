@@ -12,7 +12,7 @@ import javax.validation.constraints.Null;
 @Table(name = "[node]")
 public class Node extends BaseEntity {
 	
-	enum NodeType{
+	public enum NodeType{
 		FOLDER,
 		FILE
 	}
