@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 
 import com.ce.instashare.model.User;
+import com.ce.instashare.dto.common.response.GenericResponseDTO;
+import com.ce.instashare.dto.storage.request.CreateFolderRequestDTO;
 import com.ce.instashare.dto.storage.request.NavigateRequestDTO;
 import com.ce.instashare.dto.storage.request.UploadFileRequestDTO;
 import com.ce.instashare.model.Node;
@@ -43,16 +45,20 @@ public class StorageService {
 	@Autowired
 	BlockRepository blockRep;
 	
-	public void createStorageForUser(User user) {
+	public void createStorageForUser(User user) throws Exception{
 			try {
-				Node rootNode = new Node();
-				rootNode.setType(NodeType.FOLDER);
-				nodeRep.save(rootNode);
-				Storage storage = new Storage();
-				storage.setUser(user);
-				storage.setRootNode(rootNode);
-				storageRep.save(storage);
-				logger.warn("Creating Storage for User :: "+user.getEmail());
+				if(storageRep.getByUser(user) == null) {
+					Node rootNode = new Node();
+					rootNode.setType(NodeType.FOLDER);
+					nodeRep.save(rootNode);
+					Storage storage = new Storage();
+					storage.setUser(user);
+					storage.setRootNode(rootNode);
+					storageRep.save(storage);
+					logger.debug("Creating Storage for User :: "+user.getEmail());
+				}
+				else
+					throw new Exception("Storage for user :: "+user.getEmail()+ " already created");
 			}
 			catch (Exception e) {
 				throw e;
@@ -111,6 +117,39 @@ public class StorageService {
 			throw e;
 		}
 	}
+	public GenericResponseDTO createFolder(CreateFolderRequestDTO request) throws Exception{
+		GenericResponseDTO response = new GenericResponseDTO(1, "Error creating folder "+request.getFolderName());
+		try {
+			Node rootNode = getRootNodeOfUser(request.getUserId());
+			Node parentFolder = navigate(rootNode, request.getPath());
+			List<Node> childs = nodeRep.getByParentId(parentFolder.getId());
+			boolean exist = false;
+			for(int i = 0 ; i< childs.size() ;i++) {
+				if(childs.get(i).getName().compareTo(request.getFolderName()) == 0) {
+					exist = true;
+					break;
+				}					
+			}
+			if(!exist) {
+				Node folder = new Node();
+				folder.setName(request.getFolderName());
+				folder.setType(Node.NodeType.FOLDER);
+				folder.setParentId(parentFolder.getId());
+				nodeRep.save(folder);
+				response.setErrorCode(0);
+				response.setErrorDescription("SUCCESS");
+			}
+			else {
+				response.setErrorCode(1);
+				response.setErrorDescription("A folder with name "+request.getFolderName()+" already exist");
+			}
+				
+		}
+		catch (Exception e) {
+			throw e;
+		}
+		return response;
+	}
 	private static byte[][] divideArray(byte[] source, int chunksize) {
 
 
@@ -139,31 +178,34 @@ public class StorageService {
 		return rootNode;
 	}
 	private Node navigate(Node rootNode,String path) throws Exception {
-		Node folderNode = null;
-		try {
-			if(isValidDirectoryPath(path)) {
-				String[] folders = path.split("/");
-				Node currentNode = rootNode;
-				int i = 0;
-				for( ; i < folders.length ;i++) {
-					List<Node> childs = nodeRep.getByNameAndParentId(folders[i],currentNode.getId());
-					if(!childs.isEmpty() && childs.get(0).getType() == Node.NodeType.FOLDER)
-						currentNode = childs.get(0);
+		Node folderNode = rootNode;
+		if(path != "/") {
+			try {
+				if(isValidDirectoryPath(path)) {				
+					String[] folders = path.split("/");
+					Node currentNode = rootNode;
+					int i = 0;
+					for( ; i < folders.length ;i++) {
+						List<Node> childs = nodeRep.getByNameAndParentId(folders[i],currentNode.getId());
+						if(!childs.isEmpty() && childs.get(0).getType() == Node.NodeType.FOLDER)
+							currentNode = childs.get(0);
+						else if(i > 0)
+							break;
+						
+					}				
+					if(i == folders.length)
+						folderNode = currentNode;
 					else
-						break;
+						throw new Exception("Failed to get the especiefied Node");
+					
 				}
-				if(i == folders.length)
-					folderNode = currentNode;
 				else
-					throw new Exception("Failed to get the especiefied Node");
-				
+					throw new Exception("Path is invalid");
 			}
-			else
-				throw new Exception("Path is invalid");
-		}
-		catch (Exception e) {
-			throw e;
-		}
+			catch (Exception e) {
+				throw e;
+			}
+		}		
 		return folderNode;
 	}
 	private boolean isValidDirectoryPath(String path) {
