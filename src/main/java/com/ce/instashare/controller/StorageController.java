@@ -38,6 +38,7 @@ public class StorageController {
 		}
 		 
 	}
+	
 	@RequestMapping(value = "/navigate",method = RequestMethod.POST)
 	public ResponseEntity<?> navigate(@RequestBody NavigateRequestDTO navigateDTO) {		
 		try {

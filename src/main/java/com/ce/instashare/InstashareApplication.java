@@ -9,17 +9,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.CrossOrigin;
-
 import com.ce.instashare.dto.role.request.RoleRequestDTO;
 import com.ce.instashare.dto.user.request.SignUpUserRequestDTO;
 import com.ce.instashare.model.Role;
 import com.ce.instashare.repositories.RoleRepository;
-import com.ce.instashare.repositories.UserRepository;
 import com.ce.instashare.services.UserService;
 
 
 
-@CrossOrigin
+@CrossOrigin()
 @SpringBootApplication
 public class InstashareApplication {
 	
@@ -32,8 +30,7 @@ public class InstashareApplication {
 	@Bean
     ApplicationRunner init(RoleRepository repository) {
         return (ApplicationArguments args) ->  dataRoleSetup(repository);
-    } 
-	
+    } 	
     public void dataRoleSetup(RoleRepository repository){
     	Role admin = new Role();
     	Role regularUser = new Role();
