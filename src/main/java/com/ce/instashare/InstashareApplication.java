@@ -5,10 +5,13 @@ package com.ce.instashare;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+
 import com.ce.instashare.dto.role.request.RoleRequestDTO;
 import com.ce.instashare.dto.user.request.SignUpUserRequestDTO;
 import com.ce.instashare.model.Role;
@@ -17,7 +20,7 @@ import com.ce.instashare.services.UserService;
 
 
 
-@CrossOrigin()
+@CrossOrigin
 @SpringBootApplication
 public class InstashareApplication {
 	
@@ -25,13 +28,20 @@ public class InstashareApplication {
 	private UserService userService;
 
 	public static void main(String[] args) {
-		SpringApplication.run(InstashareApplication.class, args);
+		new SpringApplicationBuilder(InstashareApplication.class)
+	    .web(WebApplicationType.REACTIVE)
+	    .run(args);
 	}
 	@Bean
     ApplicationRunner init(RoleRepository repository) {
         return (ApplicationArguments args) ->  dataRoleSetup(repository);
     } 	
-    public void dataRoleSetup(RoleRepository repository){
+	@Bean
+	WebSocketHandlerAdapter webSocketHandlerAdapter(){
+	    return new WebSocketHandlerAdapter();
+	}
+	
+	public void dataRoleSetup(RoleRepository repository){
     	Role admin = new Role();
     	Role regularUser = new Role();
     	admin.setRoleName("ADMIN");

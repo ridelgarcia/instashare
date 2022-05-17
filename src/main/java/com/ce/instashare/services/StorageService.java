@@ -80,12 +80,13 @@ public class StorageService {
 		}
 		return responseList;
 	}
-	public void uploadFile(UploadFileRequestDTO request) throws Exception{
+	public GenericResponseDTO uploadFile(UploadFileRequestDTO request) throws Exception{
+		GenericResponseDTO response = new GenericResponseDTO(0,"SUCCESS");
 		try {
 			Node rootNode= getRootNodeOfUser(request.getUserId());
 			Node folder = navigate(rootNode, request.getPath());
 			List<Block> blocks = new ArrayList<Block>();
-			byte[][] blocksData = divideArray(request.getFileContent().getBytes(), 16384);
+			byte[][] blocksData = divideArray(request.getData().getBytes(), 16384);
 			for(int i = 0 ; i < blocksData.length ;i++) {
 				Block block = new Block();
 				block.setData(blocksData[i]);
@@ -105,7 +106,7 @@ public class StorageService {
 			}
 			if(firstBlockId != "") {
 				Node fileNode = new Node();
-				fileNode.setName(request.getFileContent().getName());
+				fileNode.setName(request.getName());
 				fileNode.setType(Node.NodeType.FILE);
 				fileNode.setParentId(folder.getId());
 				fileNode.setFirstBlockId(firstBlockId);
@@ -116,6 +117,7 @@ public class StorageService {
 		catch (Exception e) {
 			throw e;
 		}
+		return response;
 	}
 	public GenericResponseDTO createFolder(CreateFolderRequestDTO request) throws Exception{
 		GenericResponseDTO response = new GenericResponseDTO(1, "Error creating folder "+request.getFolderName());
@@ -164,6 +166,7 @@ public class StorageService {
 
         return ret;
     }
+	
 	private Node getRootNodeOfUser(String userId) throws Exception {
 		Node rootNode = null;
 		try {

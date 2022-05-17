@@ -1,10 +1,12 @@
 package com.ce.instashare.dto.storage.request;
 
-import org.springframework.web.multipart.MultipartFile;
+import java.util.Arrays;
 
 public class UploadFileRequestDTO {
 
-	private MultipartFile fileContent;
+	private String data;
+	
+	private String name;
 	
 	private String path;
 	
@@ -14,19 +16,28 @@ public class UploadFileRequestDTO {
 		
 	}
 
-	public UploadFileRequestDTO(MultipartFile fileContent, String path, String userId) {
+	public UploadFileRequestDTO(String data, String name, String path, String userId) {
 		
-		this.fileContent = fileContent;
+		this.data = data;
+		this.name = name;
 		this.path = path;
 		this.userId = userId;
 	}
 
-	public MultipartFile getFileContent() {
-		return fileContent;
+	public String getData() {
+		return data;
 	}
 
-	public void setFileContent(MultipartFile fileContent) {
-		this.fileContent = fileContent;
+	public void setData(String data) {
+		this.data = data;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getPath() {
@@ -47,7 +58,10 @@ public class UploadFileRequestDTO {
 
 	@Override
 	public String toString() {
-		return "UploadFileRequestDTO [fileContent=" + fileContent + ", path=" + path + ", userId=" + userId + "]";
-	}	
+		return "UploadFileRequestDTO [data=" + data + ", name=" + name + ", path=" + path + ", userId="
+				+ userId + "]";
+	}
+
+		
 	
 }

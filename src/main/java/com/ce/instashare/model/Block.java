@@ -14,7 +14,7 @@ import javax.validation.constraints.Null;
 public class Block  extends BaseEntity{
 
 	@Null
-	@Column(name = "data")
+	@Column(name = "data",length=16384)	
 	private byte[] data;
 	
 	@Null
