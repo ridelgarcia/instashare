@@ -52,7 +52,7 @@ public class UserController {
 		}		
 	}
 	@PreAuthorize("hasAuthority('ADMIN')")
-	@RequestMapping(method = RequestMethod.PUT)
+	@RequestMapping(value = "/userupdate",method = RequestMethod.PUT)
 	public ResponseEntity<?> updateUser(@RequestBody UserRequestDTO userDto) {		
 		try {
 			UserResponseDTO response = userService.updateUser(userDto);

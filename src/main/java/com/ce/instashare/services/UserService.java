@@ -32,12 +32,7 @@ import com.ce.instashare.security.Authority;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -46,6 +41,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class UserService implements UserDetailsService {
 	
 	private static Logger logger = LogManager.getLogger(UserService.class);
+	
 	private static final ModelMapper modelMapper = new ModelMapper();
 	
 	@Autowired
@@ -55,7 +51,10 @@ public class UserService implements UserDetailsService {
 	private JwtTokenUtil jwtTokenUtil;
 
 	@Autowired
-	private UserRepository rep;	
+	private UserRepository rep;
+	
+	@Autowired
+	StorageService storageServ;
 	
 	public UserResponseDTO signup(SignUpUserRequestDTO userDto) throws Exception{
 		UserResponseDTO response = null;
@@ -65,6 +64,7 @@ public class UserService implements UserDetailsService {
 				User user = modelMapper.map(userDto,User.class);		
 				this.register(user);
 				logger.debug("Registered:: " + user);
+				storageServ.createStorageForUser(user);
 				response = modelMapper.map(user,UserResponseDTO.class);			
 			}
 			else{
@@ -84,11 +84,8 @@ public class UserService implements UserDetailsService {
 		SignInUserResponseDTO response = null;
 		if(user != null ){			
 			try
-			{
-				this.authenticate(login.getEmail(), login.getPassword());
-				final UserDetails userDetails = this
-						.loadUserByUsername(login.getEmail());
-				final String token = jwtTokenUtil.generateToken(userDetails);
+			{				
+				final String token = jwtTokenUtil.generateToken(user);
 				response = modelMapper.map(user,SignInUserResponseDTO.class);
 				response.setToken(token);
 				logger.debug("Login successful for user:: " + login.getEmail());				
@@ -200,25 +197,15 @@ public class UserService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		List<User> users = rep.getByEmail(username);
 		if (users.size() > 0) {			
-			Set<Authority> authorities = new HashSet<Authority>();
-			authorities.add(new Authority(users.get(0).getRole().getRoleName()));
+			Set<SimpleGrantedAuthority> authorities = new HashSet<SimpleGrantedAuthority>();
+			authorities.add(new SimpleGrantedAuthority(users.get(0).getRole().getRoleName()));
 			return new org.springframework.security.core.userdetails.User(users.get(0).getEmail(),users.get(0).getPassword(),
 					authorities);
 		} else {
 			throw new UsernameNotFoundException("User not found with email: " + username);
 		}
 	}
-	private void authenticate(String username, String password) throws Exception {
-		try {			
-			Authentication authentication = context.getBean(AuthenticationManager.class).authenticate(new UsernamePasswordAuthenticationToken(username, password));
-			SecurityContextHolder.getContext().setAuthentication(authentication);
-		} catch (DisabledException e) {
-			throw new Exception("USER_DISABLED", e);
-		} catch (BadCredentialsException e) {
-			throw new Exception("INVALID_CREDENTIALS", e);
-		}
-	}
-	
+		
 	private User save(User entity) {
 		return rep.save(entity);
 	}
