@@ -9,10 +9,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 
 import com.ce.instashare.model.User;
+import com.ce.instashare.notification.NotificationWebSocketHandler;
 import com.ce.instashare.dto.common.response.GenericResponseDTO;
 import com.ce.instashare.dto.storage.request.CreateFolderRequestDTO;
 import com.ce.instashare.dto.storage.request.NavigateRequestDTO;
@@ -44,6 +46,9 @@ public class StorageService {
 	
 	@Autowired
 	BlockRepository blockRep;
+	
+	@Autowired
+	NotificationWebSocketHandler handler;
 	
 	public void createStorageForUser(User user) throws Exception{
 			try {
@@ -82,6 +87,45 @@ public class StorageService {
 	}
 	public GenericResponseDTO uploadFile(UploadFileRequestDTO request) throws Exception{
 		GenericResponseDTO response = new GenericResponseDTO(0,"SUCCESS");
+		logger.warn("uploadFile +++++++  "+Thread.currentThread().getName());
+		return response;
+	}
+	public GenericResponseDTO createFolder(CreateFolderRequestDTO request) throws Exception{
+		GenericResponseDTO response = new GenericResponseDTO(1, "Error creating folder "+request.getFolderName());
+		try {
+			Node rootNode = getRootNodeOfUser(request.getUserId());
+			Node parentFolder = navigate(rootNode, request.getPath());
+			List<Node> childs = nodeRep.getByParentId(parentFolder.getId());
+			boolean exist = false;
+			for(int i = 0 ; i< childs.size() ;i++) {
+				if(childs.get(i).getName().compareTo(request.getFolderName()) == 0) {
+					exist = true;
+					break;
+				}					
+			}
+			if(!exist) {
+				Node folder = new Node();
+				folder.setName(request.getFolderName());
+				folder.setType(Node.NodeType.FOLDER);
+				folder.setParentId(parentFolder.getId());
+				nodeRep.save(folder);
+				response.setErrorCode(0);
+				response.setErrorDescription("SUCCESS");
+			}
+			else {
+				response.setErrorCode(1);
+				response.setErrorDescription("A folder with name "+request.getFolderName()+" already exist");
+			}
+				
+		}
+		catch (Exception e) {
+			throw e;
+		}
+		return response;
+	}
+	@Async
+	public void uploadFileAsync(UploadFileRequestDTO request) throws Exception {
+		logger.warn("uploadFileAsync +++++++  "+Thread.currentThread().getName());
 		try {
 			Node rootNode= getRootNodeOfUser(request.getUserId());
 			Node folder = navigate(rootNode, request.getPath());
@@ -117,40 +161,8 @@ public class StorageService {
 		catch (Exception e) {
 			throw e;
 		}
-		return response;
-	}
-	public GenericResponseDTO createFolder(CreateFolderRequestDTO request) throws Exception{
-		GenericResponseDTO response = new GenericResponseDTO(1, "Error creating folder "+request.getFolderName());
-		try {
-			Node rootNode = getRootNodeOfUser(request.getUserId());
-			Node parentFolder = navigate(rootNode, request.getPath());
-			List<Node> childs = nodeRep.getByParentId(parentFolder.getId());
-			boolean exist = false;
-			for(int i = 0 ; i< childs.size() ;i++) {
-				if(childs.get(i).getName().compareTo(request.getFolderName()) == 0) {
-					exist = true;
-					break;
-				}					
-			}
-			if(!exist) {
-				Node folder = new Node();
-				folder.setName(request.getFolderName());
-				folder.setType(Node.NodeType.FOLDER);
-				folder.setParentId(parentFolder.getId());
-				nodeRep.save(folder);
-				response.setErrorCode(0);
-				response.setErrorDescription("SUCCESS");
-			}
-			else {
-				response.setErrorCode(1);
-				response.setErrorDescription("A folder with name "+request.getFolderName()+" already exist");
-			}
-				
-		}
-		catch (Exception e) {
-			throw e;
-		}
-		return response;
+		GenericResponseDTO response = new GenericResponseDTO(0,"SUCCESS");
+		handler.notifyUser(request.getUserId(), response);
 	}
 	private static byte[][] divideArray(byte[] source, int chunksize) {
 

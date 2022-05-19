@@ -28,9 +28,14 @@ public class InstashareApplication {
 	private UserService userService;
 
 	public static void main(String[] args) {
-		new SpringApplicationBuilder(InstashareApplication.class)
-	    .web(WebApplicationType.REACTIVE)
-	    .run(args);
+		try {
+			new SpringApplicationBuilder(InstashareApplication.class)
+		    .web(WebApplicationType.REACTIVE)
+		    .run(args);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	@Bean
     ApplicationRunner init(RoleRepository repository) {
@@ -53,7 +58,7 @@ public class InstashareApplication {
     	RoleRequestDTO roleAdminRequest = new RoleRequestDTO(admin.getId(),admin.getRoleName(),admin.getRoleCode());
     	RoleRequestDTO roleUserRequest = new RoleRequestDTO(regularUser.getId(),regularUser.getRoleName(),regularUser.getRoleCode());
     	SignUpUserRequestDTO dto = new SignUpUserRequestDTO("Ridel", "Garcia", "rmora900121@gmail.com", "90012137784", roleAdminRequest);
-    	SignUpUserRequestDTO dto1 = new SignUpUserRequestDTO("Evelin", "Mora", "emora@gmail.com", "90012137784", roleUserRequest);
+    	SignUpUserRequestDTO dto1 = new SignUpUserRequestDTO("Jose", "Perez", "jose@gmail.com", "90012137784", roleUserRequest);
     	try {
     		userService.signup(dto);
     		userService.signup(dto1);

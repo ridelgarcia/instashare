@@ -32,7 +32,8 @@ public abstract class BaseEntity {
 	
 
 	public BaseEntity() {
-		
+		createdAt = Instant.now();
+		modifiedAt = Instant.now();
 	}
 
 

@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,6 +22,9 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.server.WebSocketService;
+import org.springframework.web.reactive.socket.server.support.HandshakeWebSocketService;
+import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgradeStrategy;
 
 import com.ce.instashare.notification.NotificationWebSocketHandler;
 
@@ -34,6 +38,7 @@ import org.h2.server.web.WebServlet;
 
 
 @Configuration
+@EnableAsync
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 public class WebSecurityConfig  {
@@ -56,15 +61,22 @@ public class WebSecurityConfig  {
 	    mapping.setUrlMap(map);
 	    return mapping;
 	}
+	@Bean
+	public WebSocketService webSocketService() {
+		TomcatRequestUpgradeStrategy strategy = new TomcatRequestUpgradeStrategy();
+		strategy.setMaxSessionIdleTimeout(0L);
+		strategy.setMaxBinaryMessageBufferSize(1024*1024);
+		strategy.setMaxTextMessageBufferSize(1024*1024);
+		return new HandshakeWebSocketService(strategy);
+	}
 	
 	
-	
-    @Bean
+    /*@Bean
     ServletRegistrationBean<WebServlet> h2servletRegistration(){
         ServletRegistrationBean<WebServlet> registrationBean = new ServletRegistrationBean<WebServlet>( new WebServlet());
         registrationBean.addUrlMappings("/h2-ui/*");
         return registrationBean;
-    }	
+    }*/	
     @Bean
     public SecurityWebFilterChain securitygWebFilterChain(ServerHttpSecurity http) {
         return http

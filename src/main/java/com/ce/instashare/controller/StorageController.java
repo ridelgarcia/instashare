@@ -41,6 +41,8 @@ public class StorageController {
 	@RequestMapping(value = "/uploadfile",method = RequestMethod.PUT)
 	public ResponseEntity<?> createFolder(@RequestBody UploadFileRequestDTO uploadDto) {		
 		try {
+			
+			storageSrv.uploadFileAsync(uploadDto);
 			GenericResponseDTO response = storageSrv.uploadFile(uploadDto);
 			return new ResponseEntity<GenericResponseDTO>(response,HttpStatus.OK);
 		}
